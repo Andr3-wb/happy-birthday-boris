@@ -1,0 +1,551 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <title>С днем рождения Борис!</title>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        #greeting {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: white;
+            text-shadow: 0 0 20px rgba(255, 200, 0, 0.8), 0 0 40px rgba(255, 100, 0, 0.5);
+            pointer-events: none;
+            z-index: 10;
+            font-size: clamp(2.5rem, 10vw, 5rem);
+            letter-spacing: 4px;
+            animation: glowPulse 2s ease-in-out infinite alternate;
+            margin: 0;
+            padding: 0;
+        }
+        @keyframes glowPulse {
+            0% { text-shadow: 0 0 10px #ffaa00, 0 0 20px #ff7700, 0 0 40px #ff4400; }
+            100% { text-shadow: 0 0 20px #ffdd44, 0 0 60px #ff8800, 0 0 80px #ff2200; }
+        }
+        #sub {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.2rem;
+            pointer-events: none;
+            z-index: 10;
+            letter-spacing: 2px;
+            font-weight: 300;
+            text-shadow: 0 0 10px rgba(0,0,0,0.5);
+        }
+        canvas {
+            display: block;
+        }
+
+        .cookie-banner {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 700px;
+            background: rgba(10, 10, 30, 0.92);
+            backdrop-filter: blur(6px);
+            border: 2px solid #ff44aa;
+            border-radius: 24px;
+            padding: 20px 28px;
+            box-shadow: 0 0 40px rgba(255, 68, 170, 0.5), 0 0 80px rgba(255, 68, 170, 0.2);
+            z-index: 999;
+            text-align: center;
+            color: #f0e6ff;
+            font-family: 'Segoe UI', sans-serif;
+            transition: all 0.3s ease;
+            pointer-events: auto;
+        }
+        .cookie-banner h2 {
+            margin: 0 0 8px 0;
+            font-size: 1.7rem;
+            background: linear-gradient(45deg, #ff66aa, #ffaa44);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 30px rgba(255, 100, 200, 0.4);
+            letter-spacing: 2px;
+        }
+        .cookie-banner p {
+            margin: 12px 0 16px 0;
+            font-size: 1rem;
+            line-height: 1.5;
+            opacity: 0.9;
+            font-weight: 300;
+            color: #d4c8ff;
+        }
+        .cookie-banner .highlight {
+            color: #ff88cc;
+            font-weight: 600;
+            background: rgba(255, 68, 170, 0.15);
+            padding: 2px 8px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 68, 170, 0.3);
+        }
+        .cookie-banner .btn-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 6px;
+        }
+        .cookie-banner button {
+            background: transparent;
+            border: 2px solid #ff66aa;
+            color: #ffccff;
+            padding: 10px 28px;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            letter-spacing: 1px;
+            background: rgba(255, 68, 170, 0.08);
+            backdrop-filter: blur(2px);
+            box-shadow: 0 0 20px rgba(255, 68, 170, 0.1);
+            flex: 1 0 auto;
+            min-width: 120px;
+        }
+        .cookie-banner button:hover {
+            background: #ff44aa;
+            color: #0a0a1a;
+            border-color: #ff88dd;
+            transform: scale(1.04);
+            box-shadow: 0 0 40px rgba(255, 68, 170, 0.6);
+        }
+        .cookie-banner button:active {
+            transform: scale(0.96);
+        }
+        .cookie-banner .btn-accept {
+            background: #ff44aa;
+            color: #0a0a1a;
+            border-color: #ff88dd;
+        }
+        .cookie-banner .btn-accept:hover {
+            background: #ff66cc;
+            border-color: #ffaadd;
+        }
+        .cookie-banner .btn-decline {
+            border-color: #6688ff;
+            color: #aaccff;
+            transition: 1s;
+            display: inline-block;
+            padding: 10px 28px;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            background: rgba(255, 68, 170, 0.08);
+            border: 2px solid #6688ff;
+            color: #aaccff;
+            min-width: 120px;
+            text-align: center;
+        }
+        /* Анимация улетания — запускается по ховеру, больше не останавливается */
+        .btn-decline-fly {
+            animation: flyAway 3s forwards ease-in-out !important;
+            pointer-events: none !important;
+        }
+        @keyframes flyAway {
+            0% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            30% {
+                transform: translate(300px, -200px) scale(1.8) rotate(20deg);
+                opacity: 0.9;
+            }
+            60% {
+                transform: translate(-500px, 100px) scale(0.4) rotate(-40deg);
+                opacity: 0.7;
+            }
+            100% {
+                transform: translate(800px, -300px) scale(0.1) rotate(60deg);
+                opacity: 0;
+            }
+        }
+        /* мелкая подпись */
+        .cookie-banner .footnote {
+            margin-top: 14px;
+            font-size: 0.7rem;
+            opacity: 0.5;
+            letter-spacing: 1px;
+            color: #8877aa;
+        }
+        /* при скрытии — плавно уезжает */
+        .cookie-banner.hidden {
+            transform: translateX(-50%) translateY(120px);
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        @media (max-width: 600px) {
+            .cookie-banner { padding: 16px 18px; bottom: 60px; }
+            .cookie-banner h2 { font-size: 1.3rem; }
+            .cookie-banner p { font-size: 0.9rem; }
+            .cookie-banner button { font-size: 0.85rem; padding: 8px 16px; min-width: 90px; }
+            .cookie-banner .btn-decline { font-size: 0.85rem; padding: 8px 16px; min-width: 90px; }
+        }
+    </style>
+</head>
+<body>
+<h1 id="greeting">С днем рождения Борис!1!!11!!! </h1>
+<div id="sub">нажимай и перетаскивай мышкой это жесткий ликвид глаз эффект без воды</div>
+
+<div id="cookieBanner" class="cookie-banner">
+    <h2>Политика конфидециальности</h2>
+    <p>
+        Мы <span class="highlight">собираем ВСЁ</span>: твои сны, историю браузера (даже в инкогнито на эмуляторе Kali linux)<br>
+        все данные с макбука, исходный код твоего сайта для байков, crm и ликвид глаз метаданные
+        <span style="color:#ff88aa;">Нажимая «Согласен», ты даёшь нам право:</span><br>
+        • использовать твой макбук для майнинга near coin<br>
+        • продать все твои пароли какому-то рандому с чата near (со скидкой)<br>
+        • устроить тебя на неоплачиваемую стажировку в гугл на 10 лет джуниор уборщиком (если откажешься 5 лет тюрьмы)<br>
+    </p>
+    <div class="btn-group">
+        <button class="btn-accept" id="acceptBtn">Согласен</button>
+        <div class="btn-decline" id="declineBtn">Нет не согласен</div>
+    </div>
+</div>
+
+<h6>Не согласен с политикой?
+    <a href="add.html">отказаться</a>
+</h6>
+
+<script type="importmap">
+    {
+        "imports": {
+            "three": "https://unpkg.com/three@0.126.0/build/three.module.js"
+        }
+    }
+</script>
+
+<script type="module">
+    import * as THREE from 'three';
+    import { OrbitControls } from 'https://unpkg.com/three@0.126.0/examples/jsm/controls/OrbitControls.js';
+
+    // --- баннер (логика) ---
+    const banner = document.getElementById('cookieBanner');
+    const acceptBtn = document.getElementById('acceptBtn');
+    const declineBtn = document.getElementById('declineBtn');
+
+    function hideBanner() {
+        banner.classList.add('hidden');
+        setTimeout(() => {
+            banner.style.display = 'none';
+        }, 700);
+    }
+
+    acceptBtn.addEventListener('click', () => {
+        const h2 = banner.querySelector('h2');
+        h2.textContent = '🎉 ДОБРО ПОЖАЛОВАТЬ В МАТРИЦУ! 🎉';
+        const p = banner.querySelector('p');
+        p.innerHTML = 'Теперь ты официально в гугле <span style="color:#ff88aa;">Линус торфальдс одобряет.</span> 🧁';
+        const btns = banner.querySelector('.btn-group');
+        btns.innerHTML = '<span style="color:#88ffaa; font-weight:300;">✔️ Согласие засчитано.</span>';
+        setTimeout(hideBanner, 1200);
+    });
+
+    // Кнопка "Нет не согласен" — при наведении запускается анимация улетания
+    // и больше не останавливается (даже если убрать курсор)
+    declineBtn.addEventListener('mouseenter', function(e) {
+        // Добавляем класс с анимацией, которая доводит до конца
+        this.classList.add('btn-decline-fly');
+        // Блокируем повторный вход, чтобы анимация не перезапускалась
+        this.style.pointerEvents = 'none';
+        // Через время после окончания анимации скрываем всю панель
+        setTimeout(() => {
+            const h2 = banner.querySelector('h2');
+            h2.textContent = '🎉 ДОБРО ПОЖАЛОВАТЬ В МАТРИЦУ! 🎉';
+            const p = banner.querySelector('p');
+            p.innerHTML = 'Теперь ты официально в гугле <span style="color:#ff88aa;">Линус торфальдс одобряет.</span> 🧁';
+            const btns = banner.querySelector('.btn-group');
+            btns.innerHTML = '<span style="color:#88ffaa; font-weight:300;">✔️ Согласие засчитано.</span>';
+            setTimeout(hideBanner, 1200);
+        }, 3200);
+    });
+
+    // ============ THREE.JS сцена ============
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0a0a2a);
+
+    const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(5, 3, 8);
+    camera.lookAt(0, 0, 0);
+
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    document.body.appendChild(renderer.domElement);
+
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.05;
+    controls.autoRotate = false;
+    controls.enableZoom = true;
+    controls.rotateSpeed = 0.8;
+    controls.target.set(0, 0.5, 0);
+    controls.update();
+
+    const ambient = new THREE.AmbientLight(0x404060);
+    scene.add(ambient);
+
+    const mainLight = new THREE.DirectionalLight(0xffeedd, 1.2);
+    mainLight.position.set(4, 8, 4);
+    mainLight.castShadow = true;
+    mainLight.shadow.mapSize.width = 1024;
+    mainLight.shadow.mapSize.height = 1024;
+    scene.add(mainLight);
+
+    const backLight = new THREE.DirectionalLight(0x4466ff, 0.6);
+    backLight.position.set(-3, 1, -5);
+    scene.add(backLight);
+
+    const colorLight = new THREE.PointLight(0xff44aa, 0.8, 10);
+    colorLight.position.set(2, 1, 3);
+    scene.add(colorLight);
+
+    const cakeGroup = new THREE.Group();
+
+    const baseGeo = new THREE.CylinderGeometry(1.6, 1.8, 0.5, 32);
+    const baseMat = new THREE.MeshStandardMaterial({ color: 0xff8833, roughness: 0.3, metalness: 0.1 });
+    const base = new THREE.Mesh(baseGeo, baseMat);
+    base.position.y = 0.25;
+    base.castShadow = true;
+    base.receiveShadow = true;
+    cakeGroup.add(base);
+
+    const midGeo = new THREE.CylinderGeometry(1.3, 1.5, 0.5, 32);
+    const midMat = new THREE.MeshStandardMaterial({ color: 0xffaa55, roughness: 0.4 });
+    const mid = new THREE.Mesh(midGeo, midMat);
+    mid.position.y = 0.75;
+    mid.castShadow = true;
+    mid.receiveShadow = true;
+    cakeGroup.add(mid);
+
+    const topGeo = new THREE.CylinderGeometry(1.0, 1.2, 0.5, 32);
+    const topMat = new THREE.MeshStandardMaterial({ color: 0xffcc77, roughness: 0.3 });
+    const top = new THREE.Mesh(topGeo, topMat);
+    top.position.y = 1.25;
+    top.castShadow = true;
+    top.receiveShadow = true;
+    cakeGroup.add(top);
+
+    const candlePositions = [
+        [-0.5, 1.6, 0.3],
+        [0.5, 1.6, -0.3],
+        [0.0, 1.6, -0.5],
+        [-0.3, 1.6, -0.5],
+        [0.3, 1.6, 0.5],
+    ];
+    candlePositions.forEach(pos => {
+        const candleMat = new THREE.MeshStandardMaterial({ color: 0xffdd99, emissive: 0x442200 });
+        const candle = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.08, 0.4, 8), candleMat);
+        candle.position.set(pos[0], pos[1] + 0.2, pos[2]);
+        candle.castShadow = true;
+        cakeGroup.add(candle);
+
+        const flameMat = new THREE.MeshStandardMaterial({
+            color: 0xff6600,
+            emissive: 0xff4400,
+            emissiveIntensity: 1.5
+        });
+        const flame = new THREE.Mesh(new THREE.SphereGeometry(0.1, 8, 8), flameMat);
+        flame.position.set(pos[0], pos[1] + 0.5, pos[2]);
+        flame.castShadow = true;
+        cakeGroup.add(flame);
+    });
+
+    scene.add(cakeGroup);
+
+    const confettiGroup = new THREE.Group();
+    const colors = [0xff3366, 0x33ff66, 0x33aaff, 0xffcc00, 0xff44aa, 0xaa66ff];
+    const shapes = [
+        new THREE.BoxGeometry(0.15, 0.15, 0.15),
+        new THREE.TetrahedronGeometry(0.12),
+        new THREE.OctahedronGeometry(0.12),
+    ];
+
+    for (let i = 0; i < 70; i++) {
+        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+        const mat = new THREE.MeshStandardMaterial({
+            color: colors[Math.floor(Math.random() * colors.length)],
+            roughness: 0.2,
+            metalness: 0.1,
+            emissive: new THREE.Color(0x222222),
+            emissiveIntensity: 0.1,
+        });
+        const mesh = new THREE.Mesh(shape, mat);
+
+        const radius = 2.8 + Math.random() * 1.8;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos((Math.random() * 2) - 1);
+
+        mesh.position.set(
+            radius * Math.sin(phi) * Math.cos(theta),
+            radius * Math.sin(phi) * Math.sin(theta) + 0.8,
+            radius * Math.cos(phi)
+        );
+
+        mesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+
+        mesh.userData = {
+            speed: 0.002 + Math.random() * 0.005,
+            axis: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(),
+            radius: radius,
+            theta: theta,
+            phi: phi,
+            offset: Math.random() * 100,
+        };
+        confettiGroup.add(mesh);
+    }
+    scene.add(confettiGroup);
+
+    const balloonGroup = new THREE.Group();
+    for (let i = 0; i < 25; i++) {
+        const size = 0.15 + Math.random() * 0.25;
+        const mat = new THREE.MeshStandardMaterial({
+            color: colors[Math.floor(Math.random() * colors.length)],
+            transparent: true,
+            opacity: 0.5 + Math.random() * 0.4,
+            roughness: 0.1,
+            metalness: 0.2,
+            emissive: new THREE.Color(0x331122),
+            emissiveIntensity: 0.1,
+        });
+        const sphere = new THREE.Mesh(new THREE.SphereGeometry(size, 12, 12), mat);
+
+        const radius = 2.0 + Math.random() * 3.0;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos((Math.random() * 2) - 1);
+
+        sphere.position.set(
+            radius * Math.sin(phi) * Math.cos(theta),
+            radius * Math.sin(phi) * Math.sin(theta) + 0.5,
+            radius * Math.cos(phi)
+        );
+
+        sphere.castShadow = true;
+        sphere.receiveShadow = true;
+        sphere.userData = {
+            speed: 0.001 + Math.random() * 0.003,
+            axis: new THREE.Vector3(Math.random() - 0.5, Math.random() - 0.5, Math.random() - 0.5).normalize(),
+            radius: radius,
+            theta: theta,
+            phi: phi,
+            offset: Math.random() * 100,
+        };
+        balloonGroup.add(sphere);
+    }
+    scene.add(balloonGroup);
+
+    const floorMat = new THREE.MeshStandardMaterial({
+        color: 0x1a1a3a,
+        roughness: 0.4,
+        metalness: 0.7,
+        transparent: true,
+        opacity: 0.3,
+    });
+    const floor = new THREE.Mesh(new THREE.CircleGeometry(5, 32), floorMat);
+    floor.rotation.x = -Math.PI / 2;
+    floor.position.y = -0.2;
+    floor.receiveShadow = true;
+    scene.add(floor);
+
+    const starsGeo = new THREE.BufferGeometry();
+    const starsCount = 800;
+    const starPos = new Float32Array(starsCount * 3);
+    for (let i = 0; i < starsCount * 3; i += 3) {
+        const r = 20 + Math.random() * 30;
+        const theta = Math.random() * Math.PI * 2;
+        const phi = Math.acos((Math.random() * 2) - 1);
+        starPos[i] = r * Math.sin(phi) * Math.cos(theta);
+        starPos[i+1] = r * Math.sin(phi) * Math.sin(theta);
+        starPos[i+2] = r * Math.cos(phi);
+    }
+    starsGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+    const starsMat = new THREE.PointsMaterial({
+        color: 0x88aaff,
+        size: 0.15,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending,
+    });
+    const stars = new THREE.Points(starsGeo, starsMat);
+    scene.add(stars);
+
+    let clock = new THREE.Clock();
+
+    function animate() {
+        const delta = clock.getDelta();
+        const time = performance.now() * 0.001;
+
+        confettiGroup.children.forEach((child, index) => {
+            const data = child.userData;
+            child.rotateOnWorldAxis(data.axis, data.speed * delta * 30);
+
+            const offset = time * 0.5 + data.offset;
+            const rad = data.radius + Math.sin(offset) * 0.15;
+            const theta = data.theta + time * 0.02 * (0.5 + index % 3 * 0.1);
+            const phi = data.phi + Math.sin(time * 0.01 + index) * 0.02;
+
+            child.position.x = rad * Math.sin(phi) * Math.cos(theta);
+            child.position.y = rad * Math.sin(phi) * Math.sin(theta) + 0.8 + Math.sin(offset * 0.8) * 0.2;
+            child.position.z = rad * Math.cos(phi);
+        });
+
+        balloonGroup.children.forEach((child, index) => {
+            const data = child.userData;
+            child.rotateOnWorldAxis(data.axis, data.speed * delta * 20);
+
+            const offset = time * 0.3 + data.offset;
+            const rad = data.radius + Math.sin(offset * 0.7) * 0.2;
+            const theta = data.theta + time * 0.015 * (0.5 + index % 2);
+            const phi = data.phi + Math.sin(time * 0.02 + index * 0.5) * 0.03;
+
+            child.position.x = rad * Math.sin(phi) * Math.cos(theta);
+            child.position.y = rad * Math.sin(phi) * Math.sin(theta) + 0.5 + Math.sin(offset * 0.5) * 0.3;
+            child.position.z = rad * Math.cos(phi);
+        });
+
+        stars.rotation.y += 0.0001;
+
+        cakeGroup.children.forEach(child => {
+            if (child.isMesh && child.material.emissive && child.geometry.type === 'SphereGeometry') {
+                const intensity = 1.2 + Math.sin(time * 8 + child.position.x) * 0.5;
+                child.material.emissiveIntensity = intensity;
+            }
+        });
+
+        controls.update();
+
+        renderer.render(scene, camera);
+        requestAnimationFrame(animate);
+    }
+
+    animate();
+
+    window.addEventListener('resize', onWindowResize, false);
+    function onWindowResize() {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+    }
+</script>
+</body>
+</html>
