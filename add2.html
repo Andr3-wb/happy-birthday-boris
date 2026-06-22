@@ -1,0 +1,590 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>♚ Шахматный ад с рекламой ♚</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1a1a2e;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* ГЛАВНАЯ ОБЁРТКА – шахматы + рекламный хаос */
+        .chaos-wrapper {
+            max-width: 800px;
+            width: 100%;
+            background: #16213e;
+            border-radius: 32px;
+            padding: 20px 20px 40px;
+            border: 2px solid #f0a500;
+            position: relative;
+            z-index: 5;
+            backdrop-filter: blur(2px);
+        }
+
+        /* ЗАГОЛОВОК – шахматный, но уже с намёком */
+        .title-block {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0f3460;
+            padding: 10px 20px;
+            border-radius: 60px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .title-block h1 {
+            color: #f5f5f5;
+            font-size: 1.7rem;
+            letter-spacing: 2px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .title-block h1 span {
+            background: #e94560;
+            padding: 0 12px;
+            border-radius: 40px;
+            font-size: 1.2rem;
+            color: #0f3460;
+        }
+
+        .prize-badge {
+            background: gold;
+            color: #1a1a2e;
+            font-weight: bold;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 0.9rem;
+            animation: pulse-badge 1.2s infinite;
+        }
+
+        @keyframes pulse-badge {
+            0% { transform: scale(1); background: gold; }
+            50% { transform: scale(1.1); background: #ffd700; box-shadow: 0 0 20px #ffaa00; }
+            100% { transform: scale(1); background: gold; }
+        }
+
+        /* ШАХМАТНАЯ ДОСКА */
+        .board-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background: #2d4059;
+            padding: 20px 10px;
+            border-radius: 40px;
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 0;
+            width: 100%;
+            max-width: 480px;
+            aspect-ratio: 1/1;
+            border: 6px solid #b08d57;
+            overflow: ;: hidden;
+            box-shadow: 0 0 0 4px #3e2c1b;
+        }
+
+        .cell {
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            font-weight: bold;
+            transition: 0.1s;
+            background: #f0d9b5;
+            color: #1a1a2e;
+        }
+
+        .cell.dark {
+            background: #b58863;
+        }
+
+        .cell.selected {
+            box-shadow: inset 0 0 0 4px #ffdd44;
+        }
+
+        /* подпись хода */
+        .turn-indicator {
+            margin: 16px 0 6px;
+            background: #1a1a2e;
+            padding: 8px 28px;
+            border-radius: 60px;
+            color: #eee;
+            font-weight: bold;
+            border: 2px solid #f0a500;
+            letter-spacing: 1px;
+            display: inline-block;
+        }
+
+        .turn-indicator i {
+            color: #f0a500;
+            font-style: normal;
+        }
+
+        /* КНОПКИ */
+        .action-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 10px 0 5px;
+        }
+
+        .action-row button {
+            background: #e94560;
+            border: none;
+            padding: 12px 28px;
+            border-radius: 50px;
+            font-weight: bold;
+            color: white;
+            font-size: 1rem;
+            box-shadow: 0 6px 0 #7a1f2e;
+            transition: all 0.07s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .action-row button:active {
+            transform: translateY(6px);
+            box-shadow: 0 2px 0 #7a1f2e;
+        }
+
+        .action-row button.reset {
+            background: #2d4059;
+            box-shadow: 0 6px 0 #111c2b;
+            border-color: #8aa3c9;
+        }
+
+        /* РЕКЛАМНЫЙ БЛОК – БЕСЯЧИЙ, МНОГО, ВСЮДУ */
+        .ad-blaster {
+            margin: 20px 0 0;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        /* каждый баннер – убогий, яркий, с анимацией */
+        .ad-banner {
+            background: linear-gradient(145deg, #ffd966, #ffb347);
+            padding: 12px 16px;
+            border-radius: 60px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            border: 4px dotted #ff1a1a;
+            box-shadow: 0 0 0 3px #00ff99, 0 0 20px #ff00aa;
+            font-weight: 800;
+            color: #1a0033;
+            text-shadow: 2px 2px 0 #ffaa00;
+            animation: ad-flash 0.9s infinite alternate;
+            transform: rotate(0.5deg);
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .ad-banner:nth-child(odd) {
+            background: linear-gradient(135deg, #a8ff78, #78ffd6);
+            border-color: #ff00dd;
+            box-shadow: 0 0 0 5px #ff00aa, 0 0 30px #00ffea;
+            transform: rotate(-0.8deg);
+            animation: ad-flash2 1.4s infinite alternate;
+        }
+
+        .ad-banner:nth-child(3n) {
+            background: linear-gradient(45deg, #ff9a9e, #fad0c4);
+            border-color: #00ff00;
+            box-shadow: 0 0 0 5px #ff00ff, 0 0 30px #ffff00;
+            transform: rotate(1.2deg);
+            animation: ad-flash3 0.7s infinite alternate;
+        }
+
+        .ad-banner:nth-child(5n) {
+            background: #ffdde1;
+            border-color: #ff00aa;
+            box-shadow: 0 0 0 6px #0ff, 0 0 40px #f0f;
+            transform: rotate(-1.5deg);
+            animation: ad-flash4 1.1s infinite alternate;
+        }
+
+        @keyframes ad-flash {
+            0% { opacity: 0.9; transform: scale(1) rotate(0.5deg); }
+            100% { opacity: 1; transform: scale(1.04) rotate(-0.5deg); background: #ffb347; }
+        }
+        @keyframes ad-flash2 {
+            0% { opacity: 0.8; transform: scale(0.98) rotate(-0.8deg); }
+            100% { opacity: 1; transform: scale(1.06) rotate(0.8deg); background: #78ffd6; }
+        }
+        @keyframes ad-flash3 {
+            0% { opacity: 0.7; transform: rotate(1.2deg) skewX(2deg); }
+            100% { opacity: 1; transform: rotate(-1.2deg) skewX(-2deg); background: #fad0c4; }
+        }
+        @keyframes ad-flash4 {
+            0% { opacity: 0.8; transform: rotate(-1.5deg) scale(0.95); }
+            100% { opacity: 1; transform: rotate(1.5deg) scale(1.08); background: #ffdde1; }
+        }
+
+        .ad-banner .emoji-big {
+            font-size: 2.2rem;
+            margin-right: 6px;
+            filter: drop-shadow(0 0 8px red);
+        }
+
+        .ad-banner .ad-text {
+            flex: 1;
+            font-size: 1.1rem;
+            letter-spacing: 1px;
+            background: rgba(0,0,0,0.1);
+            padding: 5px 14px;
+            border-radius: 40px;
+            white-space: nowrap;
+        }
+
+        .ad-banner .cta-button {
+            background: black;
+            color: white;
+            padding: 8px 18px;
+            border-radius: 40px;
+            font-weight: bold;
+            border: 3px solid yellow;
+            animation: cta-pulse 0.6s infinite alternate;
+            font-size: 0.9rem;
+            margin-left: 8px;
+        }
+
+        @keyframes cta-pulse {
+            0% { background: black; transform: scale(1); }
+            100% { background: #e94560; transform: scale(1.1); color: #ffff00; }
+        }
+
+        /* плавающие баннеры поверх всего */
+        .floating-ads {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        .floating-ad {
+            position: absolute;
+            background: rgba(255, 200, 0, 0.85);
+            padding: 10px 20px;
+            border-radius: 60px;
+            font-weight: 900;
+            font-size: 1.4rem;
+            border: 6px double red;
+            box-shadow: 0 0 30px #ff00aa;
+            transform: rotate(8deg);
+            white-space: nowrap;
+            pointer-events: auto;
+            color: #1a0033;
+            text-shadow: 0 0 10px #fff;
+            animation: floatAround 12s infinite alternate ease-in-out;
+        }
+
+        .floating-ad:nth-child(1) { top: 8%; left: 2%; animation-duration: 14s; background: #ffb3b3; border-color: blue; }
+        .floating-ad:nth-child(2) { bottom: 12%; right: 3%; animation-duration: 18s; background: #b3ffb3; border-color: magenta; transform: rotate(-12deg); }
+        .floating-ad:nth-child(3) { top: 40%; right: 1%; animation-duration: 11s; background: #b3b3ff; border-color: orange; transform: rotate(20deg); }
+        .floating-ad:nth-child(4) { bottom: 30%; left: 1%; animation-duration: 16s; background: #ffccff; border-color: lime; transform: rotate(-5deg); }
+
+        @keyframes floatAround {
+            0% { transform: translate(0, 0) rotate(8deg) scale(1); }
+            25% { transform: translate(30px, -40px) rotate(-8deg) scale(1.2); }
+            50% { transform: translate(-20px, 20px) rotate(15deg) scale(0.9); }
+            75% { transform: translate(40px, 30px) rotate(-5deg) scale(1.3); }
+            100% { transform: translate(-10px, -20px) rotate(5deg) scale(1); }
+        }
+
+        /* адаптив */
+        @media (max-width: 600px) {
+            .ad-banner .ad-text { font-size: 0.8rem; white-space: normal; }
+            .floating-ad { font-size: 0.9rem; padding: 6px 12px; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ПЛАВАЮЩИЕ БАННЕРЫ (поверх всего, бесячие) -->
+<div class="floating-ads">
+    <div class="floating-ad">🔥 ФЕЙМАНОВСКИЕ ЛЕКЦИИ ПО ORBITYX SCRIPT ВСЕ ТОМА БЕСПЛАТНО</div>
+    <div class="floating-ad">💎 КАЗИНО – ВЫИГРАЙ МАКБУК 🩲</div>
+    <div class="floating-ad">🍆 МОКЕЛЕ-МБЕБЕ! 🧠</div>
+    <div class="floating-ad">👀 НОВЫЙ ЯЗЫК ПРОГРАММИРОВАНИЯ ОТ СОЗДАТЕЛЕЙ GRAVITIX</div>
+</div>
+
+<!-- ОСНОВНОЙ КОНТЕНТ -->
+<div class="chaos-wrapper">
+
+    <!-- шапка с бесящей надписью -->
+    <div class="title-block">
+        <h1>
+            ♔ ШАХМАТЫ ♔
+            <span>🤡</span>
+        </h1>
+        <div class="prize-badge">💲 МАТ за 2 хода? 💲</div>
+    </div>
+
+    <!-- ШАХМАТНАЯ ДОСКА -->
+    <div class="board-container">
+        <div class="board" id="chessBoard"></div>
+        <div class="turn-indicator">
+            <i>⚡</i> Ход: <span id="turnDisplay">чтобы отказаться от политики конфидециальномти, реши эту шахзматную задачу</span> <i>⚡</i>
+        </div>
+        <div class="action-row">
+            <button id="resetBtn" class="reset">⟳ Сброс доски</button>
+            <button id="annoyBtn">ЗАСПАВНИТЬ ФЕРЗЯ</button>
+        </div>
+    </div>
+
+    <!-- БЛОК РЕКЛАМЫ – КУЧА БАННЕРОВ, БЕСЯЧИХ -->
+    <div class="ad-blaster" id="adBlaster">
+        <!-- баннеры генерируются скриптом, но добавим и статику для надёжности -->
+    </div>
+
+    <!-- дополнительный спам-блок -->
+    <div style="margin-top: 18px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center;">
+        <span style="background: #e94560; padding: 5px 18px; border-radius: 40px; color: white; font-weight: bold; border: 4px solid yellow;">fjw9iwJF@IOWUj</span>
+        <span style="background: #00cfff; padding: 5px 18px; border-radius: 40px; color: black; font-weight: bold; border: 4px solid red; animation: pulse-badge 0.8s infinite;">ОТКАЗАТЬСЯ ОТ ПОЛИТИКИ КОНФИдЕЦИАЛЬНОСТИ</span>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ----- ШАХМАТЫ (простая позиция: мат в 1 ход? но пусть просто доска) -----
+        // Начальная расстановка (для прикола – мат в 2 хода позиция: чёрный король в углу)
+        // Используем стандартные символы юникода: ♔♕♖♗♘♙♚♛♜♝♞♟
+        const initialBoard = [
+            ['♜', '♞', '♝', '♛', '♚', '♝', '♞', '♜'],
+            ['♟', '♟', '♟', '♟', '♟', '♟', '♟', '♟'],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['', '', '', '', '', '', '', ''],
+            ['♙', '♙', '♙', '♙', '♙', '♙', '♙', '♙'],
+            ['♖', '♘', '♗', '♕', '♔', '♗', '♘', '♖']
+        ];
+
+        let board = JSON.parse(JSON.stringify(initialBoard));
+        let selectedRow = -1, selectedCol = -1;
+        let turn = 'white'; // white / black
+
+        const boardEl = document.getElementById('chessBoard');
+        const turnDisplay = document.getElementById('turnDisplay');
+
+        function renderBoard() {
+            boardEl.innerHTML = '';
+            for (let r = 0; r < 8; r++) {
+                for (let c = 0; c < 8; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell' + ((r + c) % 2 === 0 ? '' : ' dark');
+                    cell.textContent = board[r][c] || '';
+                    cell.dataset.row = r;
+                    cell.dataset.col = c;
+                    if (selectedRow === r && selectedCol === c) {
+                        cell.classList.add('selected');
+                    }
+                    // клик для "хода" (тупой функционал, но главное – реклама)
+                    cell.addEventListener('click', function() {
+                        const row = parseInt(this.dataset.row);
+                        const col = parseInt(this.dataset.col);
+                        // просто для прикола: если фигура есть – "сходим" (переместим на случайную)
+                        if (board[row][col] !== '') {
+                            // перемещаем фигуру куда-то (для веселья)
+                            const piece = board[row][col];
+                            // ищем пустую клетку
+                            let emptyCells = [];
+                            for (let i = 0; i < 8; i++) {
+                                for (let j = 0; j < 8; j++) {
+                                    if (board[i][j] === '') emptyCells.push([i, j]);
+                                }
+                            }
+                            if (emptyCells.length > 0) {
+                                const [er, ec] = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+                                board[er][ec] = piece;
+                                board[row][col] = '';
+                                // сменить ход
+                                turn = (turn === 'white' ? 'black' : 'white');
+                                turnDisplay.textContent = turn;
+                                selectedRow = -1; selectedCol = -1;
+                                renderBoard();
+                                // БЕСЯЧАЯ РЕКЛАМА ПОСЛЕ КАЖДОГО ХОДА
+                                spawnExtraAd();
+                                showFloatingAdPopup();
+                            } else {
+                                alert('Нет свободных клеток! (реклама заебала)');
+                            }
+                        } else {
+                            // если клик на пустую – просто выделение (бесячее)
+                            selectedRow = row;
+                            selectedCol = col;
+                            renderBoard();
+                        }
+                    });
+                    boardEl.appendChild(cell);
+                }
+            }
+        }
+
+        // ----- ГЕНЕРАТОР УБОГИХ БАННЕРОВ -----
+        const adPhrases = [
+            '🚨 ЗХТЧЕШЬ ПОСТАВИТЬ МАТ? ЗАЙДИ СЮДА! 🚨',
+            '🍕 БОРИС ВАЙБКОДЕР (200 СТРОЧЕК КОДА ОТ ВАС) 🍕',
+            '👑 СТАНЬ КОРОЛЁМ ЗА 1 РУБЛЬ 👑',
+            '💊 ПОДПИШИ КОНТРАКТ 💊',
+            '📺 СМОТРИ ШАХМАТЫ ПО ТВ 📺',
+            '🎰 КРУТИ БАРАБАН – ВЫИГРАЙ ЛУНУ 🎰',
+            '🦷 арыш0ыш7амо0-уйз_9йщкгитцу 🦷',
+            '🧨 КУПИ СЛОНА – ОН СЪЕСТ ЛАДЬЮ 🧨',
+            '🎁 ПОДАРОК ЗА РЕГИСТРАЦИЮ – МЫШЬ 🎁',
+            '💩 КАК ЗАРАБОТАТЬ НА NEAR COIN? ',
+            '👽 ИНОПЛАНЕТЯНЕ ИГРАЮТ В ШАХМАТЫ 👽'
+        ];
+
+        function getRandomAdText() {
+            return adPhrases[Math.floor(Math.random() * adPhrases.length)];
+        }
+
+        function createAdBanner(extraClass = '') {
+            const banner = document.createElement('div');
+            banner.className = 'ad-banner ' + extraClass;
+            const emoji = ['💢', '💥', '🔥', '💰', '🃏', '🤡', '👾', '🎯', '💋', '🧨', '⚡', '🍆', '🩲', '🧠', '💩'][Math.floor(Math.random() * 15)];
+            banner.innerHTML = `
+                    <span class="emoji-big">${emoji}</span>
+                    <span class="ad-text">${getRandomAdText()}</span>
+                    <span class="cta-button">▶ НАЖМИ МЕНЯ ◀</span>
+                `;
+            // клик по баннеру – открывает попап (бесячий)
+            banner.addEventListener('click', function(e) {
+                e.stopPropagation();
+                alert(' ТЫ КЛИКНУЛ НА РЕКЛАМУ! \nЗабери свой приз: бесконечный спам!');
+                // добавим ещё баннеров
+                for (let i=0; i<3; i++) {
+                    setTimeout(() => spawnExtraAd(), i*200);
+                }
+            });
+            return banner;
+        }
+
+        function spawnExtraAd() {
+            const container = document.getElementById('adBlaster');
+            const banner = createAdBanner('extra-spawn');
+            container.prepend(banner); // сверху, чтоб бесило
+            // ограничим количество, чтоб не слишком тормозило
+            while (container.children.length > 25) {
+                container.removeChild(container.lastChild);
+            }
+        }
+
+        // плавающий всплывающий баннер
+        function showFloatingAdPopup() {
+            const floatContainer = document.querySelector('.floating-ads');
+            const newFloat = document.createElement('div');
+            newFloat.className = 'floating-ad';
+            newFloat.textContent = '🚀 ' + getRandomAdText() + ' 🚀';
+            newFloat.style.position = 'fixed';
+            newFloat.style.top = (10 + Math.random() * 70) + '%';
+            newFloat.style.left = (5 + Math.random() * 60) + '%';
+            newFloat.style.fontSize = (1.2 + Math.random() * 1.8) + 'rem';
+            newFloat.style.background = `hsl(${Math.random() * 360}, 90%, 70%)`;
+            newFloat.style.borderColor = ['red','blue','green','magenta','orange','cyan'][Math.floor(Math.random()*6)];
+            newFloat.style.pointerEvents = 'auto';
+            newFloat.style.zIndex = 99999;
+            newFloat.style.transform = `rotate(${Math.random()*30-15}deg)`;
+            newFloat.style.animation = 'floatAround ' + (10 + Math.random()*15) + 's infinite alternate';
+            floatContainer.appendChild(newFloat);
+            // самоуничтожение через 20 секунд
+            setTimeout(() => {
+                if (newFloat.parentNode) newFloat.remove();
+            }, 20000);
+            // ограничим количество плавающих
+            while (floatContainer.children.length > 12) {
+                floatContainer.removeChild(floatContainer.firstChild);
+            }
+        }
+
+        // ----- ЗАПОЛНЕНИЕ РЕКЛАМОЙ ПРИ СТАРТЕ (куча баннеров) -----
+        function seedAds(count = 18) {
+            const container = document.getElementById('adBlaster');
+            container.innerHTML = '';
+            for (let i = 0; i < count; i++) {
+                const banner = createAdBanner('seed-' + i);
+                container.appendChild(banner);
+            }
+        }
+
+        // ----- КНОПКА "РЕКЛАМА ЕЩЁ!" -----
+        document.getElementById('annoyBtn').addEventListener('click', function() {
+            for (let i=0; i<5; i++) {
+                setTimeout(() => {
+                    spawnExtraAd();
+                    showFloatingAdPopup();
+                }, i*150);
+            }
+            // добавим плавающие
+            for (let i=0; i<3; i++) {
+                setTimeout(showFloatingAdPopup, i*300 + 200);
+            }
+            alert('💢 ДОБАВИЛИ ЕЩЁ РЕКЛАМЫ! ТЫ ПОПАЛ! 💢');
+        });
+
+        // ----- СБРОС ДОСКИ -----
+        document.getElementById('resetBtn').addEventListener('click', function() {
+            board = JSON.parse(JSON.stringify(initialBoard));
+            selectedRow = -1; selectedCol = -1;
+            turn = 'white';
+            turnDisplay.textContent = turn;
+            renderBoard();
+            // добавим рекламы при сбросе
+            for (let i=0; i<3; i++) {
+                setTimeout(spawnExtraAd, i*300);
+            }
+        });
+
+        // ИНИЦИАЛИЗАЦИЯ
+        renderBoard();
+        seedAds(22); // много рекламы сразу
+        // добавим плавающие
+        setTimeout(showFloatingAdPopup, 500);
+        setTimeout(showFloatingAdPopup, 1500);
+        setTimeout(showFloatingAdPopup, 3000);
+        // и каждые 15 секунд новая плавающая
+        setInterval(() => {
+            if (Math.random() > 0.3) showFloatingAdPopup();
+        }, 12000);
+
+        // также спавн рекламы при загрузке
+        for (let i=0; i<8; i++) {
+            setTimeout(spawnExtraAd, i*400 + 300);
+        }
+    })();
+</script>
+</body>
+</html>
